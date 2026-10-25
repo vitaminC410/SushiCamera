@@ -27,6 +27,12 @@ jobs:
             exit 1
           fi
           test -f app/src/main/AndroidManifest.xml
+      - name: Apply v0.2 pro UI enhancements
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d enhancements/pro-v02.patch.gz.b64 | gzip -dc | patch -p1 --batch --fuzz=0
+          grep -q "versionName '0.2.0'" app/build.gradle
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
