@@ -1,0 +1,47 @@
+name: Build Sushi Camera APK
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract uploaded SushiCamera archive
+        shell: bash
+        run: |
+          if [[ -f SushiCamera-GitHub-Actions.zip ]]; then
+            unzip -q SushiCamera-GitHub-Actions.zip
+            cp -a SushiCamera/. .
+          elif [[ -f SushiCamera-source.zip ]]; then
+            unzip -q SushiCamera-source.zip
+            cp -a SushiCamera/. .
+          elif [[ ! -f app/build.gradle ]]; then
+            echo "::error::Upload SushiCamera-GitHub-Actions.zip to the repository root, or commit the Android project source files."
+            exit 1
+          fi
+          test -f app/src/main/AndroidManifest.xml
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Install SDK
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build APK
+        run: gradle --no-daemon --stacktrace :app:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SushiCamera-debug-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
