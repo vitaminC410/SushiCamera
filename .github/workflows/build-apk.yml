@@ -46,12 +46,6 @@ jobs:
           base64 -d enhancements/pro-v04-mainactivity.java.gz.b64 | gzip -dc > app/src/main/java/dev/sushi/camera/MainActivity.java
           sed -i "s/versionCode 3/versionCode 4/;s/versionName '0.3.0'/versionName '0.4.0'/" app/build.gradle
           grep -q "versionName '0.4.0'" app/build.gradle
-      - name: Apply v0.4 iOS-inspired UI and animations
-        shell: bash
-        run: |
-          set -euo pipefail
-          base64 -d enhancements/pro-v04-ui.patch.gz.b64 | gzip -dc | patch -p1 --batch --fuzz=0
-          grep -q "versionName '0.4.0'" app/build.gradle
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
